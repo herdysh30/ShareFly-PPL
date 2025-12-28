@@ -19,7 +19,7 @@ class StoryFactory extends Factory
     {
         return [
             'caption' => fake()->realText(50),
-            'image' => 'https://picsum.photos/640/480?random=image-stories'. random_int(1, 100),
+            'image' => 'https://picsum.photos/seed/' . fake()->uuid() . '/640/480',
             'userId' => User::factory()
         ];
     }

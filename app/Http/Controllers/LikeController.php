@@ -42,7 +42,7 @@ class LikeController extends Controller
             ]);
         }
 
-        return redirect()->intended(route('home'));
+        return back();
     }
 
     public function likeComment(Comment $comment)
@@ -62,6 +62,6 @@ class LikeController extends Controller
             ]);
         }
 
-        return redirect()->intended(route('home'));
+        return back();
     }
 }
