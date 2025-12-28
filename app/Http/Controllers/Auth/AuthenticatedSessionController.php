@@ -38,8 +38,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if(Auth::user()->roleId === 1)
-        {
+        if (Auth::user()->roleId === 1) {
             return redirect()->intended(route('dashboard'));
         }
 
@@ -71,8 +70,13 @@ class AuthenticatedSessionController extends Controller
     public function createPassword(CreatePasswordRequest $request)
     {
         $validatedData = $request->validated();
-        
-        User::where('id', $request->userId)->update([
+
+        // Security fix: Verify the authenticated user is updating their own password
+        if (Auth::id() !== (int) $request->userId) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        User::where('id', Auth::id())->update([
             'password' => Hash::make($validatedData['password']),
         ]);
 
