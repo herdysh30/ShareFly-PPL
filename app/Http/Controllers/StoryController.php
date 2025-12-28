@@ -12,15 +12,14 @@ class StoryController extends Controller
 {
     public function index(Request $request)
     {
-        $story = Story::all();
+        // Only get stories from the last 24 hours
+        $story = Story::where('created_at', '>=', now()->subHours(24))->get();
 
-        if (!$story) {
+        if (!$story || $story->isEmpty()) {
             return response()->json([
-                "error" => [
-                    "message" => "Data All User in Database Not Found !",
-                    "status_code" => 404
-                ]
-            ], 404);
+                "data" => [],
+                "status_code" => 200
+            ], 200);
         }
 
         return response()->json([

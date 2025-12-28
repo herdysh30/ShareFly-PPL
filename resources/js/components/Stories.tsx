@@ -63,7 +63,13 @@ export default function Stories() {
         return acc;
     }, {} as Record<number, IStories[]>);
 
-    const userIds = Object.keys(groupedStories).map(Number);
+    // Build userIds array preserving insertion order (auth user first)
+    const userIds: number[] = [];
+    allStories.forEach((story) => {
+        if (!userIds.includes(story.userId)) {
+            userIds.push(story.userId);
+        }
+    });
 
     const handleStoryEnd = () => {
         const currentUserId = userIds[selectedStoryIndex];
@@ -97,9 +103,12 @@ export default function Stories() {
         }
     };
 
-    const handleStoryClick = (index: number) => {
-        setSelectedStoryIndex(index);
-        setOpenDialog(true);
+    const handleStoryClick = (userId: number) => {
+        const actualIndex = userIds.indexOf(userId);
+        if (actualIndex !== -1) {
+            setSelectedStoryIndex(actualIndex);
+            setOpenDialog(true);
+        }
     };
 
     const isAllStoriesViewed = (userId: number) => {
@@ -188,18 +197,15 @@ export default function Stories() {
                         <Loader2 className="mx-auto animate-spin" />
                     ) : userIds ? (
                         userIds.map((userId, index) => {
-                            if (
-                                userId === auth?.user?.id &&
-                                !hasAuthUserStories
-                            )
-                                return null;
+                            // Always skip auth user - they have separate avatar
+                            if (userId === auth?.user?.id) return null;
                             const story: IStories = groupedStories[userId][0];
                             const isViewed = isAllStoriesViewed(userId);
                             return (
                                 <CarouselItem
                                     key={story.id}
                                     className="basis-1/6 sm:basis-[12%] md:basis-1/6 lg:basis-[10%] pl-0 xl:basis-1/12 ml-3 flex flex-col items-center cursor-pointer gap-1"
-                                    onClick={() => handleStoryClick(index)}
+                                    onClick={() => handleStoryClick(userId)}
                                 >
                                     <Avatar
                                         className={`border-[3px] md:w-14 md:h-14 w-10 h-10 ${
