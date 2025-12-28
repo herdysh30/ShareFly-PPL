@@ -11,15 +11,30 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AppLayout from "@/layouts/AppLayout";
 import { HomeContext } from "@/pages/Home";
-import { ArrowLeft, Mail, Phone, Calendar, BadgeCheckIcon } from "lucide-react";
+import {
+    ArrowLeft,
+    Mail,
+    Phone,
+    Calendar,
+    BadgeCheckIcon,
+    Grid3X3,
+} from "lucide-react";
 import { Link } from "@inertiajs/react";
+
+interface Post {
+    id: number;
+    description: string;
+    image: string;
+    created_at: string;
+}
 
 interface EditProps {
     mustVerifyEmail: boolean;
     status?: string;
+    posts?: Post[];
 }
 
-export default function Edit({ mustVerifyEmail, status }: EditProps) {
+export default function Edit({ mustVerifyEmail, status, posts }: EditProps) {
     const { auth } = usePage().props;
 
     const contextData = {
@@ -82,14 +97,14 @@ export default function Edit({ mustVerifyEmail, status }: EditProps) {
 
                         <CardContent className="p-6 space-y-4">
                             {/* Bio */}
-                            {auth.user?.bio && (
-                                <div>
-                                    <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
-                                        Bio
-                                    </h3>
-                                    <p className="text-sm">{auth.user.bio}</p>
-                                </div>
-                            )}
+                            <div>
+                                <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+                                    Bio
+                                </h3>
+                                <p className="text-sm">
+                                    {auth.user?.bio || "No bio yet"}
+                                </p>
+                            </div>
 
                             {/* Info */}
                             <div className="grid gap-3">
@@ -133,6 +148,49 @@ export default function Edit({ mustVerifyEmail, status }: EditProps) {
                                 <div className="p-3 text-sm text-green-600 rounded-lg bg-green-100/50">
                                     Profile updated successfully.
                                 </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Posts Grid */}
+                    <Card className="w-full max-w-2xl">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Grid3X3 className="size-5" />
+                                My Posts ({posts?.length || 0})
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {posts && posts.length > 0 ? (
+                                <div className="grid grid-cols-3 gap-2">
+                                    {posts.map((post) => (
+                                        <div
+                                            key={post.id}
+                                            className="relative aspect-square group"
+                                        >
+                                            <img
+                                                src={
+                                                    post.image?.startsWith(
+                                                        "http"
+                                                    )
+                                                        ? post.image
+                                                        : `/storage/${post.image}`
+                                                }
+                                                alt={post.description}
+                                                className="object-cover w-full h-full rounded-lg"
+                                            />
+                                            <div className="absolute inset-0 flex items-center justify-center transition-opacity bg-black/50 opacity-0 group-hover:opacity-100 rounded-lg">
+                                                <p className="p-2 text-xs text-center text-white line-clamp-3">
+                                                    {post.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-center text-muted-foreground">
+                                    No posts yet. Share your first post!
+                                </p>
                             )}
                         </CardContent>
                     </Card>
