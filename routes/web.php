@@ -50,19 +50,34 @@ Route::middleware('auth')
                         Route::controller(DashboardController::class)
                             ->group(
                                 function () {
+                                    // Dashboard home
                                     Route::get('dashboard', 'index')->name('dashboard');
+
+                                    // Posts CRUD
                                     Route::get('dashboard/posts', 'posts')->name('dashboard.posts');
-                                    Route::post('dashboard/post/{id}', 'deletePost')->name('dashboard.delete.post');
+                                    Route::get('dashboard/posts/create', 'createPost')->name('dashboard.posts.create');
+                                    Route::post('dashboard/posts', 'storePost')->name('dashboard.posts.store');
+                                    Route::get('dashboard/posts/{post}', 'showPost')->name('dashboard.posts.show');
+                                    Route::get('dashboard/posts/{post}/edit', 'editPost')->name('dashboard.posts.edit');
+                                    Route::put('dashboard/posts/{post}', 'updatePost')->name('dashboard.posts.update');
+                                    Route::delete('dashboard/posts/{post}', 'deletePost')->name('dashboard.posts.delete');
+
+                                    // Users CRUD
                                     Route::get('dashboard/users', 'users')->name('dashboard.users');
-                                    Route::post('dashboard/user/{id}', 'deleteUser')->name('dashboard.delete.user');
+                                    Route::get('dashboard/users/create', 'createUser')->name('dashboard.users.create');
+                                    Route::post('dashboard/users', 'storeUser')->name('dashboard.users.store');
+                                    Route::get('dashboard/users/{user}', 'showUser')->name('dashboard.users.show');
+                                    Route::get('dashboard/users/{user}/edit', 'editUser')->name('dashboard.users.edit');
+                                    Route::put('dashboard/users/{user}', 'updateUser')->name('dashboard.users.update');
+                                    Route::delete('dashboard/users/{user}', 'deleteUser')->name('dashboard.users.delete');
                                 }
                             );
                     }
                 );
-            
+
             Route::controller(LikeController::class)
                 ->group(
-                    function(){
+                    function () {
                         Route::post('like/{post}', 'likePost')->name('like.post');
                         Route::post('like/{comment}', 'likeComment')->name('like.comment');
                     }
