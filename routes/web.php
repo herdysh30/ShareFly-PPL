@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\StoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'check.password'])
@@ -44,6 +45,9 @@ Route::middleware(['web', 'check.password'])
 Route::middleware('auth')
     ->group(
         function () {
+            // Story routes
+            Route::post('/stories', [StoryController::class, 'store'])->name('store.story');
+
             Route::middleware(['verified', 'admin'])
                 ->group(
                     function () {

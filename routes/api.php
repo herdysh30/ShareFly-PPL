@@ -16,6 +16,7 @@ Route::controller(StoryController::class)
     ->group(
         function () {
             Route::get('stories', 'index')->name('get.stories');
+            Route::post('stories', 'store')->name('store.story')->middleware('auth:sanctum');
         }
     );
 
