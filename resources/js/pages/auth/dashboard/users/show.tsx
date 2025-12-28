@@ -17,7 +17,7 @@ interface User {
     roleId: number;
     role?: { name: string };
     created_at: string;
-    posts?: Array<{ id: number; description: string; image: string }>;
+    post?: Array<{ id: number; description: string; image: string }>;
 }
 
 const ShowUser = ({ user }: { user: User }) => {
@@ -102,25 +102,38 @@ const ShowUser = ({ user }: { user: User }) => {
                         <Card className="bg-gray-800 border-gray-700">
                             <CardHeader>
                                 <CardTitle className="text-white">
-                                    Recent Posts ({user.posts?.length || 0})
+                                    Recent Posts ({user.post?.length || 0})
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                {user.posts && user.posts.length > 0 ? (
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {user.posts.slice(0, 6).map((post) => (
-                                            <img
-                                                key={post.id}
-                                                src={
-                                                    post.image?.startsWith(
-                                                        "http"
-                                                    )
-                                                        ? post.image
-                                                        : `/storage/${post.image}`
-                                                }
-                                                alt={post.description}
-                                                className="w-full h-24 object-cover rounded"
-                                            />
+                                {user.post && user.post.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {user.post.slice(0, 6).map((p) => (
+                                            <Link
+                                                key={p.id}
+                                                href={route(
+                                                    "dashboard.posts.show",
+                                                    p.id
+                                                )}
+                                                className="flex gap-3 p-2 bg-gray-700/50 rounded-lg hover:bg-gray-600/50 transition-colors"
+                                            >
+                                                <img
+                                                    src={
+                                                        p.image?.startsWith(
+                                                            "http"
+                                                        )
+                                                            ? p.image
+                                                            : `/storage/${p.image}`
+                                                    }
+                                                    alt={p.description}
+                                                    className="w-16 h-16 object-cover rounded flex-shrink-0"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm text-gray-300 line-clamp-2">
+                                                        {p.description}
+                                                    </p>
+                                                </div>
+                                            </Link>
                                         ))}
                                     </div>
                                 ) : (

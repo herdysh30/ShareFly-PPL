@@ -161,7 +161,7 @@ class DashboardController extends Controller
     public function showUser(User $user)
     {
         return \Inertia\Inertia::render('auth/dashboard/users/show', [
-            'user' => $user->load('role', 'posts')
+            'user' => $user->load('role', 'post')
         ]);
     }
 
