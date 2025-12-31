@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoryCreateRequest;
 use App\Http\Requests\StoryUpdateRequest;
 use App\Models\Story;
 use Illuminate\Http\Request;
@@ -11,15 +12,14 @@ class StoryController extends Controller
 {
     public function index(Request $request)
     {
-        $story = Story::all();
+        // Only get stories from the last 24 hours
+        $story = Story::where('created_at', '>=', now()->subHours(24))->get();
 
-        if (!$story) {
+        if (!$story || $story->isEmpty()) {
             return response()->json([
-                "error" => [
-                    "message" => "Data All User in Database Not Found !",
-                    "status_code" => 404
-                ]
-            ], 404);
+                "data" => [],
+                "status_code" => 200
+            ], 200);
         }
 
         return response()->json([
@@ -28,22 +28,25 @@ class StoryController extends Controller
         ], 200);
     }
 
-    public function store(Request $request)
+    public function store(StoryCreateRequest $request)
     {
-        $request->validated();
+        $validated = $request->validated();
+        $imagePath = null;
 
         if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
+            $imagePath = $request->file('image')->store('stories', 'public');
         }
 
-        $post = Story::create([
-            'caption' => $request->caption,
-            'image' => $imageName,
-            'user_id' => Auth::user()->id,
+        $story = Story::create([
+            'caption' => $validated['caption'],
+            'image' => $imagePath ? '/storage/' . $imagePath : null,
+            'userId' => Auth::id(),
         ]);
 
-        return response()->json(['message' => 'Post created successfully'], 201);
+        return response()->json([
+            'message' => 'Story created successfully',
+            'story' => $story
+        ], 201);
     }
     public function show(Request $request)
     {

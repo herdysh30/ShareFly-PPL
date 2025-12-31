@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('no_telepon')->nullable();
             $table->timestamp('verified_at')->nullable();
-            $table->string('profile_picture', 1024 * 10)->nullable();
-            $table->string('profile_background', 1024 * 10)->nullable();
+            $table->text('profile_picture')->nullable();
+            $table->text('profile_background')->nullable();
             $table->foreignId('roleId')->constrained('roles', 'id');
             $table->timestamp('banned_at')->nullable();
             $table->rememberToken();

@@ -24,26 +24,44 @@ class LikeController extends Controller
 
         return response()->json($likes, 200);
     }
-    
+
     public function likePost(Post $post)
     {
-        Like::create([
-            "userId" => Auth::id(),
-            'entityId' => $post->id,
-            'entity_type' => 'post'
-        ]);
+        $existingLike = Like::where('userId', Auth::id())
+            ->where('entityId', $post->id)
+            ->where('entity_type', 'post')
+            ->first();
 
-        return redirect()->intended(route('home'));
+        if ($existingLike) {
+            $existingLike->delete();
+        } else {
+            Like::create([
+                "userId" => Auth::id(),
+                'entityId' => $post->id,
+                'entity_type' => 'post'
+            ]);
+        }
+
+        return back();
     }
 
     public function likeComment(Comment $comment)
     {
-        Like::create([
-            "userId" => Auth::id(),
-            'entityId' => $comment->id,
-            'entity_type' => 'comment'
-        ]);
+        $existingLike = Like::where('userId', Auth::id())
+            ->where('entityId', $comment->id)
+            ->where('entity_type', 'comment')
+            ->first();
 
-        return redirect()->intended(route('home'));
+        if ($existingLike) {
+            $existingLike->delete();
+        } else {
+            Like::create([
+                "userId" => Auth::id(),
+                'entityId' => $comment->id,
+                'entity_type' => 'comment'
+            ]);
+        }
+
+        return back();
     }
 }

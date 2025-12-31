@@ -1,41 +1,48 @@
-import { Avatar, AvatarImage } from './ui/avatar'
-import { Button } from './ui/button'
-import { BadgeCheckIcon, Indent, LogIn } from 'lucide-react'
-import { Link, usePage } from '@inertiajs/react'
-import { useHomeContext } from '@/pages/Home'
-import { PhotoProvider, PhotoView } from 'react-photo-view';
-import BioEdit from './BioEdit'
+import { Avatar, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { BadgeCheckIcon, Indent, LogIn } from "lucide-react";
+import { Link, usePage } from "@inertiajs/react";
+import { useHomeContext } from "@/pages/Home";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import BioEdit from "./BioEdit";
 
 const PeopleYouMayKnow = () => {
-    const { auth } = usePage().props
-    const { canLogin, canRegister } = useHomeContext()
+    const { auth } = usePage().props;
+    const { canLogin, canRegister } = useHomeContext();
 
     return (
         <div className="sticky h-screen px-2">
-            {
-                auth.user ? (
-                    <>
-                        <div className="flex gap-2 p-2 border rounded-lg">
-                            <PhotoProvider maskOpacity={.75}>
-                                <PhotoView src={auth.user.profile_picture}>
-                                    <Avatar className='cursor-pointer'>
-                                        <AvatarImage src={auth.user.profile_picture} alt={auth.user.profile_picture} />
-                                    </Avatar>
-                                </PhotoView>
-                            </PhotoProvider>
-                            <div className="flex flex-col w-full">
-                                <div className="flex gap-2">
-                                    <Button variant={'link'} className="justify-start h-full p-0 text-foreground">{auth.user.username}</Button>
-                                    {
-                                        auth.user.verified_at && (
-                                            <BadgeCheckIcon className="text-blue-500 size-5" />
-                                        )
-                                    }
-                                </div>
-                                <BioEdit />
+            {auth.user ? (
+                <>
+                    <div className="flex gap-2 p-2 border rounded-lg">
+                        <PhotoProvider maskOpacity={0.75}>
+                            <PhotoView src={auth.user.profile_picture}>
+                                <Avatar className="cursor-pointer">
+                                    <AvatarImage
+                                        src={auth.user.profile_picture}
+                                        alt={auth.user.profile_picture}
+                                    />
+                                </Avatar>
+                            </PhotoView>
+                        </PhotoProvider>
+                        <div className="flex flex-col w-full">
+                            <div className="flex gap-2">
+                                <Link href={route("profile.edit")}>
+                                    <Button
+                                        variant={"link"}
+                                        className="justify-start h-full p-0 text-foreground"
+                                    >
+                                        {auth.user.username}
+                                    </Button>
+                                </Link>
+                                {auth.user.verified_at && (
+                                    <BadgeCheckIcon className="text-blue-500 size-5" />
+                                )}
                             </div>
+                            <BioEdit />
                         </div>
-                        {/* <div className="flex flex-col px-2 mt-4 border rounded-lg">
+                    </div>
+                    {/* <div className="flex flex-col px-2 mt-4 border rounded-lg">
                             <div className="flex items-center justify-between px-2">
                                 <span className="text-sm">
                                     People you may know
@@ -64,42 +71,46 @@ const PeopleYouMayKnow = () => {
                                 ))}
                             </div>
                         </div> */}
-                    </>
-                ) : (
-                    <div className="flex flex-col gap-2 p-2 border rounded-lg">
-                        <p className="text-sm">
-                            Start your journey, and look for people you like. Then, follow to communicate with each other!
-                        </p>
-                        <div className="flex gap-2">
-                            {
-                                canLogin && (
-                                    <>
-                                        <Button variant={'default'} asChild>
-                                            <Link href={route('login')} className="w-full">
-                                                <LogIn />
-                                                Login
-                                            </Link>
-                                        </Button>
-                                        {
-                                            canRegister && (
-                                                <Button variant={'default'} asChild>
-                                                    <Link href={route('register')} className="w-full">
-                                                        <Indent />
-                                                        Register
-                                                    </Link>
-                                                </Button>
-                                            )
-                                        }
-                                    </>
-                                )
-                            }
-                        </div>
+                </>
+            ) : (
+                <div className="flex flex-col gap-2 p-2 border rounded-lg">
+                    <p className="text-sm">
+                        Start your journey, and look for people you like. Then,
+                        follow to communicate with each other!
+                    </p>
+                    <div className="flex gap-2">
+                        {canLogin && (
+                            <>
+                                <Button variant={"default"} asChild>
+                                    <Link
+                                        href={route("login")}
+                                        className="w-full"
+                                    >
+                                        <LogIn />
+                                        Login
+                                    </Link>
+                                </Button>
+                                {canRegister && (
+                                    <Button variant={"default"} asChild>
+                                        <Link
+                                            href={route("register")}
+                                            className="w-full"
+                                        >
+                                            <Indent />
+                                            Register
+                                        </Link>
+                                    </Button>
+                                )}
+                            </>
+                        )}
                     </div>
-                )
-            }
-            <p className="mt-4 text-xs text-center text-muted-foreground/50">Copyright &copy; ShareFly from Cookie-Army</p>
+                </div>
+            )}
+            <p className="mt-4 text-xs text-center text-muted-foreground/50">
+                Copyright &copy; ShareFly from Cookie-Army
+            </p>
         </div>
-    )
-}
+    );
+};
 
-export default PeopleYouMayKnow
+export default PeopleYouMayKnow;

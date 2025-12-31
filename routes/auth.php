@@ -49,7 +49,7 @@ Route::middleware('auth')
                 ->controller(ProfileController::class)
                 ->group(
                     function () {
-                        Route::get('/', 'index')->name('profile.edit');
+                        Route::get('/', 'edit')->name('profile.edit');
                         Route::patch('/', 'update')->name('profile.update');
                         Route::patch('/bio/edit', 'editBio')->name('edit.bio');
                         Route::patch('/bio/delete', 'deleteBio')->name('delete.bio');
