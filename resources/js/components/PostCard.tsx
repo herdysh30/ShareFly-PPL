@@ -193,10 +193,15 @@ export default function PostCard() {
                             </Avatar>
                             <CardTitle className="flex items-center gap-2 text-sm">
                                 <Link
-                                    href={route(
-                                        "user.profile",
+                                    href={
+                                        auth.user?.username ===
                                         post.users.username
-                                    )}
+                                            ? route("profile.edit")
+                                            : route(
+                                                  "user.profile",
+                                                  post.users.username
+                                              )
+                                    }
                                     className="hover:underline"
                                 >
                                     {post.users.username}

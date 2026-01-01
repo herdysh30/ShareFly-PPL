@@ -13,7 +13,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { Link, router } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import TimeAgo from "react-timeago";
 import { IPosts, IComments } from "@/types";
 import { Loader2, SendHorizonal, Smile } from "lucide-react";
@@ -30,6 +30,7 @@ interface CommentDialogProps {
 }
 
 export default function CommentDialog({ post, trigger }: CommentDialogProps) {
+    const { auth } = usePage().props;
     const [comment, setComment] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { theme } = useTheme();
@@ -122,10 +123,18 @@ export default function CommentDialog({ post, trigger }: CommentDialogProps) {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
                                                 <Link
-                                                    href={route(
-                                                        "user.profile",
+                                                    href={
+                                                        auth.user?.username ===
                                                         comment.users?.username
-                                                    )}
+                                                            ? route(
+                                                                  "profile.edit"
+                                                              )
+                                                            : route(
+                                                                  "user.profile",
+                                                                  comment.users
+                                                                      ?.username
+                                                              )
+                                                    }
                                                     className="font-semibold text-sm hover:underline"
                                                 >
                                                     {comment.users?.username}

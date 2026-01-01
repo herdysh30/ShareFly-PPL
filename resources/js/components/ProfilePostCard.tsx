@@ -106,10 +106,14 @@ export default function ProfilePostCard({ posts }: ProfilePostCardProps) {
                         </Avatar>
                         <CardTitle className="flex items-center gap-2 text-sm">
                             <Link
-                                href={route(
-                                    "user.profile",
-                                    post.users?.username
-                                )}
+                                href={
+                                    auth.user?.username === post.users?.username
+                                        ? route("profile.edit")
+                                        : route(
+                                              "user.profile",
+                                              post.users?.username
+                                          )
+                                }
                                 className="hover:underline"
                             >
                                 {post.users?.username}
@@ -204,10 +208,15 @@ export default function ProfilePostCard({ posts }: ProfilePostCardProps) {
                             </Button>
                             <CardDescription className="w-full space-y-2">
                                 <Link
-                                    href={route(
-                                        "user.profile",
+                                    href={
+                                        auth.user?.username ===
                                         post.users?.username
-                                    )}
+                                            ? route("profile.edit")
+                                            : route(
+                                                  "user.profile",
+                                                  post.users?.username
+                                              )
+                                    }
                                 >
                                     <Button
                                         variant={"link"}
@@ -240,10 +249,16 @@ export default function ProfilePostCard({ posts }: ProfilePostCardProps) {
                                         className="flex gap-2 text-sm"
                                     >
                                         <Link
-                                            href={route(
-                                                "user.profile",
+                                            href={
+                                                auth.user?.username ===
                                                 comment.users?.username
-                                            )}
+                                                    ? route("profile.edit")
+                                                    : route(
+                                                          "user.profile",
+                                                          comment.users
+                                                              ?.username
+                                                      )
+                                            }
                                             className="font-semibold hover:underline"
                                         >
                                             {comment.users?.username}
