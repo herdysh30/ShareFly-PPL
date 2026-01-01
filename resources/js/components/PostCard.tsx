@@ -38,12 +38,14 @@ import { ShowMore } from "@re-dev/react-truncate";
 import Loading from "./ui/loading";
 import TimeAgo from "react-timeago";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import { router, usePage } from "@inertiajs/react";
+import { router, usePage, Link } from "@inertiajs/react";
 import { ILikes, IPosts } from "@/types";
 import { useSweetAlert } from "@/hooks/use-sweetAlert";
 import { useToast } from "@/hooks/use-toast";
 import usePosts from "@/hooks/features/use-posts";
 import useLikes from "@/hooks/features/use-likes";
+import useSavedPosts from "@/hooks/features/use-saved-posts";
+import CommentDialog from "./CommentDialog";
 const EmojiPicker = lazy(() => import("emoji-picker-react"));
 
 export default function PostCard() {
@@ -52,10 +54,43 @@ export default function PostCard() {
     const toast = useToast();
     const { data, isLoading, refetch: refetchPost } = usePosts();
     const { data: dataLikes, refetch } = useLikes();
+    const { data: savedPosts, refetch: refetchSaved } = useSavedPosts();
 
     const userLiked: ILikes[] = dataLikes?.data?.filter(
         (like: ILikes) => like.userId === auth?.user?.id
     );
+
+    const isPostSaved = (postId: number) => {
+        return savedPosts?.some((post: IPosts) => post.id === postId);
+    };
+
+    const handleClickSave = (postId: number) => {
+        if (!auth?.user) {
+            modal({
+                title: "You're Not Logged In",
+                text: "Please Login to save posts!",
+                icon: "warning",
+                confirmButtonText: "Login",
+                denyButtonText: "Register",
+                showCancelButton: true,
+                preConfirm() {
+                    router.visit("login");
+                },
+            });
+            return;
+        }
+
+        router.post(
+            route("post.save", postId),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    refetchSaved();
+                },
+            }
+        );
+    };
 
     const handleClickReport = () => {
         !auth.user &&
@@ -157,7 +192,20 @@ export default function PostCard() {
                                 />
                             </Avatar>
                             <CardTitle className="flex items-center gap-2 text-sm">
-                                {post.users.username}
+                                <Link
+                                    href={
+                                        auth.user?.username ===
+                                        post.users.username
+                                            ? route("profile.edit")
+                                            : route(
+                                                  "user.profile",
+                                                  post.users.username
+                                              )
+                                    }
+                                    className="hover:underline"
+                                >
+                                    {post.users.username}
+                                </Link>
                                 {post.users.verified_at && (
                                     <BadgeCheckIcon className="text-blue-500 size-5" />
                                 )}
@@ -262,15 +310,33 @@ export default function PostCard() {
                                             }
                                         />
                                     </Button>
-                                    <Button variant={"ghost"} size={"icon"}>
-                                        <MessageCircleMore />
-                                    </Button>
+                                    <CommentDialog
+                                        post={post}
+                                        trigger={
+                                            <Button
+                                                variant={"ghost"}
+                                                size={"icon"}
+                                            >
+                                                <MessageCircleMore />
+                                            </Button>
+                                        }
+                                    />
                                     <Button variant={"ghost"} size={"icon"}>
                                         <Send />
                                     </Button>
                                 </div>
-                                <Button variant={"ghost"} size={"icon"}>
-                                    <Bookmark />
+                                <Button
+                                    variant={"ghost"}
+                                    size={"icon"}
+                                    onClick={() => handleClickSave(post.id)}
+                                >
+                                    <Bookmark
+                                        className={
+                                            isPostSaved(post.id)
+                                                ? "fill-current"
+                                                : ""
+                                        }
+                                    />
                                 </Button>
                             </div>
                             <Button
@@ -280,15 +346,22 @@ export default function PostCard() {
                                 {post.likes_count} Likes
                             </Button>
                             <CardDescription className="w-full space-y-2">
-                                <Button
-                                    variant={"link"}
-                                    className="h-full p-0 w-max text-foreground"
-                                >
-                                    {post.users.username}
-                                    {post.users.verified_at && (
-                                        <BadgeCheckIcon className="text-blue-500 size-5" />
+                                <Link
+                                    href={route(
+                                        "user.profile",
+                                        post.users.username
                                     )}
-                                </Button>
+                                >
+                                    <Button
+                                        variant={"link"}
+                                        className="h-full p-0 w-max text-foreground"
+                                    >
+                                        {post.users.username}
+                                        {post.users.verified_at && (
+                                            <BadgeCheckIcon className="text-blue-500 size-5" />
+                                        )}
+                                    </Button>
+                                </Link>
                                 <ShowMore
                                     lines={2}
                                     id="showmore"
@@ -299,116 +372,51 @@ export default function PostCard() {
                                 </ShowMore>
                             </CardDescription>
                         </CardContent>
-                        <CardFooter className="flex flex-col p-2 pt-0">
-                            {post.comments_count ? (
-                                <Dialog>
-                                    <DialogTrigger asChild>
+                        <CardFooter className="flex flex-col p-2 pt-0 gap-2">
+                            {/* Preview: Show first 2 comments */}
+                            {post.comments && post.comments.length > 0 && (
+                                <div className="w-full space-y-2">
+                                    {post.comments
+                                        .slice(0, 2)
+                                        .map((comment) => (
+                                            <div
+                                                key={comment.id}
+                                                className="flex gap-2 text-sm"
+                                            >
+                                                <Link
+                                                    href={route(
+                                                        "user.profile",
+                                                        comment.users?.username
+                                                    )}
+                                                    className="font-semibold hover:underline"
+                                                >
+                                                    {comment.users?.username}
+                                                </Link>
+                                                <span className="text-muted-foreground line-clamp-1">
+                                                    {comment.description}
+                                                </span>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+
+                            {/* See all comments dialog */}
+                            {post.comments_count > 2 && (
+                                <CommentDialog
+                                    post={post}
+                                    trigger={
                                         <Button
                                             variant={"link"}
-                                            className="p-0 text-foreground"
+                                            className="p-0 text-muted-foreground self-start"
                                         >
-                                            See more {post.comments_count}{" "}
+                                            View all {post.comments_count}{" "}
                                             comments
                                         </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="p-0 overflow-hidden min-w-[90%] min-h-[80%]">
-                                        <div className="flex gap-2">
-                                            <img
-                                                src="https://placehold.co/200"
-                                                alt="img"
-                                            />
-                                            <div className="grid gap-2">
-                                                <div className="flex items-center gap-2 py-2 h-max">
-                                                    <PhotoProvider
-                                                        maskOpacity={0.75}
-                                                    >
-                                                        <PhotoView
-                                                            src={
-                                                                post.users
-                                                                    .profile_picture
-                                                            }
-                                                        >
-                                                            <Avatar className="cursor-pointer">
-                                                                <AvatarImage
-                                                                    src={
-                                                                        post
-                                                                            .users
-                                                                            .profile_picture
-                                                                    }
-                                                                    alt={
-                                                                        post
-                                                                            .users
-                                                                            .profile_picture
-                                                                    }
-                                                                />
-                                                            </Avatar>
-                                                        </PhotoView>
-                                                    </PhotoProvider>
-                                                    <div className="flex flex-col w-ful">
-                                                        <div className="flex gap-2">
-                                                            <Button
-                                                                variant={"link"}
-                                                                className="justify-start h-full p-0 text-foreground"
-                                                            >
-                                                                {
-                                                                    post.users
-                                                                        .username
-                                                                }
-                                                            </Button>
-                                                            {post.users
-                                                                .verified_at && (
-                                                                <BadgeCheckIcon className="text-blue-500 size-5" />
-                                                            )}
-                                                            <Button
-                                                                variant={"link"}
-                                                            >
-                                                                Follow +
-                                                            </Button>
-                                                        </div>
-                                                        <span className="-mt-4 text-xs">
-                                                            <TimeAgo
-                                                                date={
-                                                                    post.created_at
-                                                                }
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <PhotoProvider
-                                                        maskOpacity={0.75}
-                                                    >
-                                                        <PhotoView
-                                                            src={
-                                                                post.users
-                                                                    .profile_picture
-                                                            }
-                                                        >
-                                                            <Avatar className="cursor-pointer">
-                                                                <AvatarImage
-                                                                    src={
-                                                                        post
-                                                                            .users
-                                                                            .profile_picture
-                                                                    }
-                                                                    alt={
-                                                                        post
-                                                                            .users
-                                                                            .profile_picture
-                                                                    }
-                                                                />
-                                                            </Avatar>
-                                                        </PhotoView>
-                                                    </PhotoProvider>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
-                            ) : null}
-                            <CommentInput
-                                comments_count={post.comments_count}
-                            />
+                                    }
+                                />
+                            )}
+
+                            <CommentInput postId={post.id} />
                         </CardFooter>
                     </Card>
                 ))
@@ -419,9 +427,11 @@ export default function PostCard() {
     );
 }
 
-const CommentInput = ({ comments_count }: { comments_count: number }) => {
+const CommentInput = ({ postId }: { postId: number }) => {
     const [comment, setComment] = useState<string>("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { theme } = useTheme();
+    const { refetch: refetchPost } = usePosts();
 
     const handleEmojiClick = (emojiData: EmojiClickData) => {
         setComment((prevComment) => prevComment + emojiData.emoji);
@@ -429,14 +439,28 @@ const CommentInput = ({ comments_count }: { comments_count: number }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setComment("");
+        if (comment.trim().length === 0 || isSubmitting) return;
+
+        setIsSubmitting(true);
+        router.post(
+            route("comment.store", postId),
+            { description: comment },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setComment("");
+                    refetchPost();
+                },
+                onFinish: () => setIsSubmitting(false),
+            }
+        );
     };
 
     return (
         <div className="flex flex-col w-full">
             <form className="relative flex gap-2" onSubmit={handleSubmit}>
                 <Textarea
-                    placeholder="Write your commentar..."
+                    placeholder="Write your comment..."
                     className="resize-none scrollbar-w-1 scrollbar scrollbar-thumb-foreground scrollbar-thumb-rounded-lg"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
@@ -447,9 +471,13 @@ const CommentInput = ({ comments_count }: { comments_count: number }) => {
                         type="submit"
                         className="p-0"
                         size={"icon"}
-                        disabled={comment.trim().length === 0}
+                        disabled={comment.trim().length === 0 || isSubmitting}
                     >
-                        <SendHorizonal />
+                        {isSubmitting ? (
+                            <Loader2 className="animate-spin" />
+                        ) : (
+                            <SendHorizonal />
+                        )}
                     </Button>
                     <Popover>
                         <PopoverTrigger asChild>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -20,12 +21,33 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        $user = $request->user()->load('post');
+        $posts = Post::where('userId', $request->user()->id)
+            ->with(['users', 'comments.users'])
+            ->withCount(['likes', 'comments'])
+            ->latest()
+            ->get();
+
+        $savedPosts = $request->user()->savedPosts()
+            ->with(['post.users', 'post.comments.users'])
+            ->latest()
+            ->get()
+            ->pluck('post'); // Extract posts from saved posts relation
+
+        $likedPosts = Post::whereHas('likes', function ($q) use ($request) {
+            $q->where('userId', $request->user()->id)
+                ->where('entity_type', 'post');
+        })
+            ->with(['users', 'comments.users'])
+            ->withCount(['likes', 'comments'])
+            ->latest()
+            ->get();
 
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
-            'posts' => $user->post,
+            'posts' => $posts,
+            'savedPosts' => $savedPosts,
+            'likedPosts' => $likedPosts,
         ]);
     }
 

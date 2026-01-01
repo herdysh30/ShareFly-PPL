@@ -16,6 +16,7 @@ Route::middleware(['web', 'check.password'])
                 ->group(
                     function () {
                         Route::get('/', 'index')->name('home');
+                        Route::get('/user/{username}', 'showUserProfile')->name('user.profile');
                     }
                 );
 
@@ -47,6 +48,13 @@ Route::middleware('auth')
         function () {
             // Story routes
             Route::post('/stories', [StoryController::class, 'store'])->name('store.story');
+
+            // Comment routes
+            Route::post('/comment/{post}', [\App\Http\Controllers\CommentController::class, 'store'])->name('comment.store');
+
+            // Saved post routes
+            Route::post('/save-post/{post}', [\App\Http\Controllers\SavedPostController::class, 'toggle'])->name('post.save');
+            Route::get('/saved-posts', [\App\Http\Controllers\SavedPostController::class, 'index'])->name('saved.posts');
 
             Route::middleware(['verified', 'admin'])
                 ->group(

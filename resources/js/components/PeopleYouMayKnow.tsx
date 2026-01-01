@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { BadgeCheckIcon, Indent, LogIn } from "lucide-react";
 import { Link, usePage } from "@inertiajs/react";
@@ -16,12 +16,22 @@ const PeopleYouMayKnow = () => {
                 <>
                     <div className="flex gap-2 p-2 border rounded-lg">
                         <PhotoProvider maskOpacity={0.75}>
-                            <PhotoView src={auth.user.profile_picture}>
+                            <PhotoView
+                                src={
+                                    auth.user.profile_picture ||
+                                    `https://ui-avatars.com/api/?name=${auth.user.username}`
+                                }
+                            >
                                 <Avatar className="cursor-pointer">
                                     <AvatarImage
                                         src={auth.user.profile_picture}
-                                        alt={auth.user.profile_picture}
+                                        alt={auth.user.username}
                                     />
+                                    <AvatarFallback className="bg-primary text-primary-foreground">
+                                        {auth.user.username
+                                            ?.slice(0, 2)
+                                            .toUpperCase()}
+                                    </AvatarFallback>
                                 </Avatar>
                             </PhotoView>
                         </PhotoProvider>

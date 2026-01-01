@@ -2,10 +2,10 @@ export interface ConnectedAccount {
     id: number;
     provider: string;
     provider_id: number;
-    created_at: string
+    created_at: string;
 }
 
-export declare type ProviderId = 'google' | 'tiktok' | 'twitter-oauth-2';
+export declare type ProviderId = "google" | "tiktok" | "twitter-oauth-2";
 
 export interface Provider {
     id: ProviderId;
@@ -71,23 +71,24 @@ interface IPosts {
     id: number;
     slug: string;
     description: string;
-    image: string
-    userId: number
-    users: User
+    image: string;
+    userId: number;
+    users: User;
     likes_count: number;
     comments_count: number;
-    created_at: DateTime
-    updated_at: DateTime
+    comments: IComments[];
+    created_at: DateTime;
+    updated_at: DateTime;
 }
 
 interface IStories {
     id: number;
     caption: string;
-    image: string
-    userId: number
-    users: User
-    created_at: DateTime
-    updated_at: DateTime
+    image: string;
+    userId: number;
+    users: User;
+    created_at: DateTime;
+    updated_at: DateTime;
 }
 
 interface ILikes {
@@ -104,6 +105,7 @@ interface IComments {
     description: string;
     postId: number;
     userId: number;
+    users: User;
     created_at: DateTime;
     updated_at: DateTime;
 }
@@ -114,7 +116,9 @@ interface IHomeProps {
     hasHome: boolean;
 }
 
-export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+export type PageProps<
+    T extends Record<string, unknown> = Record<string, unknown>
+> = T & {
     auth: {
         user: User;
     };

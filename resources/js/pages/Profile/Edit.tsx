@@ -1,5 +1,5 @@
 import { Head, usePage } from "@inertiajs/react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
     Card,
     CardContent,
@@ -18,24 +18,33 @@ import {
     Calendar,
     BadgeCheckIcon,
     Grid3X3,
+    Bookmark,
+    Heart,
 } from "lucide-react";
 import { Link } from "@inertiajs/react";
-
-interface Post {
-    id: number;
-    description: string;
-    image: string;
-    created_at: string;
-}
+import { useState } from "react";
+import ProfilePostCard from "@/components/ProfilePostCard";
+import { IPosts } from "@/types";
 
 interface EditProps {
     mustVerifyEmail: boolean;
     status?: string;
-    posts?: Post[];
+    posts?: IPosts[];
+    savedPosts?: IPosts[];
+    likedPosts?: IPosts[];
 }
 
-export default function Edit({ mustVerifyEmail, status, posts }: EditProps) {
+export default function Edit({
+    mustVerifyEmail,
+    status,
+    posts,
+    savedPosts,
+    likedPosts,
+}: EditProps) {
     const { auth } = usePage().props;
+    const [activeTab, setActiveTab] = useState<"posts" | "saved" | "liked">(
+        "posts"
+    );
 
     const contextData = {
         canLogin: false,
@@ -74,13 +83,14 @@ export default function Edit({ mustVerifyEmail, status, posts }: EditProps) {
                         <CardHeader className="relative -mt-16 text-center">
                             <Avatar className="w-24 h-24 mx-auto border-4 border-background">
                                 <AvatarImage
-                                    src={
-                                        auth.user?.profile_picture ||
-                                        "https://ui-avatars.com/api/?name=" +
-                                            auth.user?.username
-                                    }
+                                    src={auth.user?.profile_picture}
                                     alt={auth.user?.username}
                                 />
+                                <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                                    {auth.user?.username
+                                        ?.slice(0, 2)
+                                        .toUpperCase()}
+                                </AvatarFallback>
                             </Avatar>
                             <CardTitle className="flex items-center justify-center gap-2 mt-2">
                                 {auth.user?.firstname} {auth.user?.lastname}
@@ -136,7 +146,6 @@ export default function Edit({ mustVerifyEmail, status, posts }: EditProps) {
                                 </span>
                             </div>
 
-                            {/* Status Messages */}
                             {mustVerifyEmail &&
                                 !auth.user?.email_verified_at && (
                                     <div className="p-3 text-sm text-yellow-600 rounded-lg bg-yellow-100/50">
@@ -152,48 +161,58 @@ export default function Edit({ mustVerifyEmail, status, posts }: EditProps) {
                         </CardContent>
                     </Card>
 
-                    {/* Posts Grid */}
-                    <Card className="w-full max-w-2xl">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Grid3X3 className="size-5" />
-                                My Posts ({posts?.length || 0})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {posts && posts.length > 0 ? (
-                                <div className="grid grid-cols-3 gap-2">
-                                    {posts.map((post) => (
-                                        <div
-                                            key={post.id}
-                                            className="relative aspect-square group"
-                                        >
-                                            <img
-                                                src={
-                                                    post.image?.startsWith(
-                                                        "http"
-                                                    )
-                                                        ? post.image
-                                                        : `/storage/${post.image}`
-                                                }
-                                                alt={post.description}
-                                                className="object-cover w-full h-full rounded-lg"
-                                            />
-                                            <div className="absolute inset-0 flex items-center justify-center transition-opacity bg-black/50 opacity-0 group-hover:opacity-100 rounded-lg">
-                                                <p className="p-2 text-xs text-center text-white line-clamp-3">
-                                                    {post.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-center text-muted-foreground">
-                                    No posts yet. Share your first post!
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
+                    {/* Tab Navigation */}
+                    <div className="w-full max-w-2xl flex gap-4 border-b">
+                        <Button
+                            variant="ghost"
+                            className={`flex items-center gap-2 rounded-none border-b-2 ${
+                                activeTab === "posts"
+                                    ? "border-primary"
+                                    : "border-transparent"
+                            }`}
+                            onClick={() => setActiveTab("posts")}
+                        >
+                            <Grid3X3 className="size-4" />
+                            My Posts ({posts?.length || 0})
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className={`flex items-center gap-2 rounded-none border-b-2 ${
+                                activeTab === "saved"
+                                    ? "border-primary"
+                                    : "border-transparent"
+                            }`}
+                            onClick={() => setActiveTab("saved")}
+                        >
+                            <Bookmark className="size-4" />
+                            Saved ({savedPosts?.length || 0})
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className={`flex items-center gap-2 rounded-none border-b-2 ${
+                                activeTab === "liked"
+                                    ? "border-primary"
+                                    : "border-transparent"
+                            }`}
+                            onClick={() => setActiveTab("liked")}
+                        >
+                            <Heart className="size-4" />
+                            Liked ({likedPosts?.length || 0})
+                        </Button>
+                    </div>
+
+                    {/* Posts Content */}
+                    <div className="w-full max-w-2xl">
+                        {activeTab === "posts" && (
+                            <ProfilePostCard posts={posts || []} />
+                        )}
+                        {activeTab === "saved" && (
+                            <ProfilePostCard posts={savedPosts || []} />
+                        )}
+                        {activeTab === "liked" && (
+                            <ProfilePostCard posts={likedPosts || []} />
+                        )}
+                    </div>
                 </div>
             </AppLayout>
         </HomeContext.Provider>
