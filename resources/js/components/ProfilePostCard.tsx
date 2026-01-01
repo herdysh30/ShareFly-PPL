@@ -39,6 +39,7 @@ import { router, usePage, Link } from "@inertiajs/react";
 import { ILikes, IPosts } from "@/types";
 import useLikes from "@/hooks/features/use-likes";
 import useSavedPosts from "@/hooks/features/use-saved-posts";
+import CommentDialog from "./CommentDialog";
 const EmojiPicker = lazy(() => import("emoji-picker-react"));
 
 interface ProfilePostCardProps {
@@ -168,105 +169,14 @@ export default function ProfilePostCard({ posts }: ProfilePostCardProps) {
                                         }
                                     />
                                 </Button>
-                                <Dialog>
-                                    <DialogTrigger asChild>
+                                <CommentDialog
+                                    post={post}
+                                    trigger={
                                         <Button variant={"ghost"} size={"icon"}>
                                             <MessageCircleMore />
                                         </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-                                        <DialogTitle className="flex items-center gap-2">
-                                            <Avatar className="w-8 h-8">
-                                                <AvatarImage
-                                                    src={
-                                                        post.users
-                                                            ?.profile_picture
-                                                    }
-                                                />
-                                            </Avatar>
-                                            <span>
-                                                {post.users?.username}'s Post
-                                            </span>
-                                        </DialogTitle>
-                                        <div className="flex gap-4 flex-1 overflow-hidden">
-                                            <div className="flex-shrink-0 w-1/2">
-                                                <img
-                                                    src={
-                                                        post.image?.startsWith(
-                                                            "http"
-                                                        )
-                                                            ? post.image
-                                                            : `/storage/${post.image}`
-                                                    }
-                                                    alt={post.description}
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                />
-                                            </div>
-                                            <div className="flex-1 flex flex-col overflow-hidden">
-                                                <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                                                    {post.comments?.length >
-                                                    0 ? (
-                                                        post.comments.map(
-                                                            (comment) => (
-                                                                <div
-                                                                    key={
-                                                                        comment.id
-                                                                    }
-                                                                    className="flex gap-2"
-                                                                >
-                                                                    <Avatar className="w-8 h-8 flex-shrink-0">
-                                                                        <AvatarImage
-                                                                            src={
-                                                                                comment
-                                                                                    .users
-                                                                                    ?.profile_picture
-                                                                            }
-                                                                        />
-                                                                    </Avatar>
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <Link
-                                                                                href={route(
-                                                                                    "user.profile",
-                                                                                    comment
-                                                                                        .users
-                                                                                        ?.username
-                                                                                )}
-                                                                                className="font-semibold text-sm hover:underline"
-                                                                            >
-                                                                                {
-                                                                                    comment
-                                                                                        .users
-                                                                                        ?.username
-                                                                                }
-                                                                            </Link>
-                                                                            <span className="text-xs text-muted-foreground">
-                                                                                <TimeAgo
-                                                                                    date={
-                                                                                        comment.created_at
-                                                                                    }
-                                                                                />
-                                                                            </span>
-                                                                        </div>
-                                                                        <p className="text-sm">
-                                                                            {
-                                                                                comment.description
-                                                                            }
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        )
-                                                    ) : (
-                                                        <p className="text-center text-muted-foreground py-4">
-                                                            No comments yet
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                                    }
+                                />
                                 <Button variant={"ghost"} size={"icon"}>
                                     <Send />
                                 </Button>
@@ -346,98 +256,17 @@ export default function ProfilePostCard({ posts }: ProfilePostCardProps) {
                             </div>
                         )}
                         {post.comments_count > 2 && (
-                            <Dialog>
-                                <DialogTrigger asChild>
+                            <CommentDialog
+                                post={post}
+                                trigger={
                                     <Button
                                         variant={"link"}
                                         className="p-0 text-muted-foreground self-start"
                                     >
                                         View all {post.comments_count} comments
                                     </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-                                    <DialogTitle className="flex items-center gap-2">
-                                        <Avatar className="w-8 h-8">
-                                            <AvatarImage
-                                                src={
-                                                    post.users?.profile_picture
-                                                }
-                                            />
-                                        </Avatar>
-                                        <span>
-                                            {post.users?.username}'s Post
-                                        </span>
-                                    </DialogTitle>
-                                    <div className="flex gap-4 flex-1 overflow-hidden">
-                                        <div className="flex-shrink-0 w-1/2">
-                                            <img
-                                                src={
-                                                    post.image?.startsWith(
-                                                        "http"
-                                                    )
-                                                        ? post.image
-                                                        : `/storage/${post.image}`
-                                                }
-                                                alt={post.description}
-                                                className="w-full h-full object-cover rounded-lg"
-                                            />
-                                        </div>
-                                        <div className="flex-1 flex flex-col overflow-hidden">
-                                            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                                                {post.comments?.map(
-                                                    (comment) => (
-                                                        <div
-                                                            key={comment.id}
-                                                            className="flex gap-2"
-                                                        >
-                                                            <Avatar className="w-8 h-8 flex-shrink-0">
-                                                                <AvatarImage
-                                                                    src={
-                                                                        comment
-                                                                            .users
-                                                                            ?.profile_picture
-                                                                    }
-                                                                />
-                                                            </Avatar>
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <Link
-                                                                        href={route(
-                                                                            "user.profile",
-                                                                            comment
-                                                                                .users
-                                                                                ?.username
-                                                                        )}
-                                                                        className="font-semibold text-sm hover:underline"
-                                                                    >
-                                                                        {
-                                                                            comment
-                                                                                .users
-                                                                                ?.username
-                                                                        }
-                                                                    </Link>
-                                                                    <span className="text-xs text-muted-foreground">
-                                                                        <TimeAgo
-                                                                            date={
-                                                                                comment.created_at
-                                                                            }
-                                                                        />
-                                                                    </span>
-                                                                </div>
-                                                                <p className="text-sm">
-                                                                    {
-                                                                        comment.description
-                                                                    }
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
+                                }
+                            />
                         )}
                     </CardFooter>
                 </Card>
