@@ -1,5 +1,5 @@
 import { AvatarImage } from "@radix-ui/react-avatar";
-import { Avatar } from "./ui/avatar";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
     Carousel,
     CarouselContent,
@@ -182,6 +182,11 @@ export default function Stories() {
                                 <AvatarImage
                                     src={auth?.user?.profile_picture}
                                 />
+                                <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                                    {auth?.user?.username
+                                        ?.slice(0, 2)
+                                        .toUpperCase()}
+                                </AvatarFallback>
                             </Avatar>
                             {auth?.user && !hasAuthUserStories && (
                                 <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
@@ -217,6 +222,11 @@ export default function Stories() {
                                         <AvatarImage
                                             src={story?.users?.profile_picture}
                                         />
+                                        <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                                            {story?.users?.username
+                                                ?.slice(0, 2)
+                                                .toUpperCase()}
+                                        </AvatarFallback>
                                     </Avatar>
                                     <span className="text-xs">
                                         {story?.users?.username.slice(0, 9) +

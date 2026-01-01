@@ -38,7 +38,7 @@ import { ShowMore } from "@re-dev/react-truncate";
 import Loading from "./ui/loading";
 import TimeAgo from "react-timeago";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import { router, usePage } from "@inertiajs/react";
+import { router, usePage, Link } from "@inertiajs/react";
 import { ILikes, IPosts } from "@/types";
 import { useSweetAlert } from "@/hooks/use-sweetAlert";
 import { useToast } from "@/hooks/use-toast";
@@ -157,7 +157,15 @@ export default function PostCard() {
                                 />
                             </Avatar>
                             <CardTitle className="flex items-center gap-2 text-sm">
-                                {post.users.username}
+                                <Link
+                                    href={route(
+                                        "user.profile",
+                                        post.users.username
+                                    )}
+                                    className="hover:underline"
+                                >
+                                    {post.users.username}
+                                </Link>
                                 {post.users.verified_at && (
                                     <BadgeCheckIcon className="text-blue-500 size-5" />
                                 )}
@@ -280,15 +288,22 @@ export default function PostCard() {
                                 {post.likes_count} Likes
                             </Button>
                             <CardDescription className="w-full space-y-2">
-                                <Button
-                                    variant={"link"}
-                                    className="h-full p-0 w-max text-foreground"
-                                >
-                                    {post.users.username}
-                                    {post.users.verified_at && (
-                                        <BadgeCheckIcon className="text-blue-500 size-5" />
+                                <Link
+                                    href={route(
+                                        "user.profile",
+                                        post.users.username
                                     )}
-                                </Button>
+                                >
+                                    <Button
+                                        variant={"link"}
+                                        className="h-full p-0 w-max text-foreground"
+                                    >
+                                        {post.users.username}
+                                        {post.users.verified_at && (
+                                            <BadgeCheckIcon className="text-blue-500 size-5" />
+                                        )}
+                                    </Button>
+                                </Link>
                                 <ShowMore
                                     lines={2}
                                     id="showmore"

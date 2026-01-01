@@ -16,6 +16,7 @@ Route::middleware(['web', 'check.password'])
                 ->group(
                     function () {
                         Route::get('/', 'index')->name('home');
+                        Route::get('/user/{username}', 'showUserProfile')->name('user.profile');
                     }
                 );
 

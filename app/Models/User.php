@@ -44,6 +44,20 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Get profile picture with fallback to generated avatar
+     */
+    public function getProfilePictureAttribute($value): string
+    {
+        if ($value) {
+            return $value;
+        }
+
+        // Generate fallback avatar with user initials
+        $name = $this->username ?? $this->firstname ?? 'User';
+        return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=random&color=fff&bold=true";
+    }
+
     public function role()
     {
         return $this->belongsTo(Role::class, 'roleId');
