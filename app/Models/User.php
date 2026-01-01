@@ -50,12 +50,34 @@ class User extends Authenticatable
     public function getProfilePictureAttribute($value): string
     {
         if ($value) {
-            return $value;
+            return str_starts_with($value, 'http') ? $value : '/storage/' . $value;
         }
 
         // Generate fallback avatar with user initials
         $name = $this->username ?? $this->firstname ?? 'User';
         return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=random&color=fff&bold=true";
+    }
+
+    /**
+     * Update the user's profile photo.
+     *
+     * @param  \Illuminate\Http\UploadedFile  $photo
+     * @return void
+     */
+    public function updateProfilePicture($photo)
+    {
+        tap($this->profile_picture, function ($previous) use ($photo) {
+            $this->forceFill([
+                'profile_picture' => $photo->storePublicly(
+                    'images/users',
+                    ['disk' => 'public']
+                ),
+            ])->save();
+
+            if ($previous && !str_starts_with($previous, 'http')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($previous);
+            }
+        });
     }
 
     public function role()
