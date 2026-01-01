@@ -27,10 +27,27 @@ class ProfileController extends Controller
             ->latest()
             ->get();
 
+        $savedPosts = $request->user()->savedPosts()
+            ->with(['post.users', 'post.comments.users'])
+            ->latest()
+            ->get()
+            ->pluck('post'); // Extract posts from saved posts relation
+
+        $likedPosts = Post::whereHas('likes', function ($q) use ($request) {
+            $q->where('userId', $request->user()->id)
+                ->where('entity_type', 'post');
+        })
+            ->with(['users', 'comments.users'])
+            ->withCount(['likes', 'comments'])
+            ->latest()
+            ->get();
+
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
             'posts' => $posts,
+            'savedPosts' => $savedPosts,
+            'likedPosts' => $likedPosts,
         ]);
     }
 

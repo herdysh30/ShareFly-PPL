@@ -19,10 +19,10 @@ import {
     BadgeCheckIcon,
     Grid3X3,
     Bookmark,
+    Heart,
 } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import { useState } from "react";
-import useSavedPosts from "@/hooks/features/use-saved-posts";
 import ProfilePostCard from "@/components/ProfilePostCard";
 import { IPosts } from "@/types";
 
@@ -30,12 +30,21 @@ interface EditProps {
     mustVerifyEmail: boolean;
     status?: string;
     posts?: IPosts[];
+    savedPosts?: IPosts[];
+    likedPosts?: IPosts[];
 }
 
-export default function Edit({ mustVerifyEmail, status, posts }: EditProps) {
+export default function Edit({
+    mustVerifyEmail,
+    status,
+    posts,
+    savedPosts,
+    likedPosts,
+}: EditProps) {
     const { auth } = usePage().props;
-    const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
-    const { data: savedPosts } = useSavedPosts();
+    const [activeTab, setActiveTab] = useState<"posts" | "saved" | "liked">(
+        "posts"
+    );
 
     const contextData = {
         canLogin: false,
@@ -178,14 +187,30 @@ export default function Edit({ mustVerifyEmail, status, posts }: EditProps) {
                             <Bookmark className="size-4" />
                             Saved ({savedPosts?.length || 0})
                         </Button>
+                        <Button
+                            variant="ghost"
+                            className={`flex items-center gap-2 rounded-none border-b-2 ${
+                                activeTab === "liked"
+                                    ? "border-primary"
+                                    : "border-transparent"
+                            }`}
+                            onClick={() => setActiveTab("liked")}
+                        >
+                            <Heart className="size-4" />
+                            Liked ({likedPosts?.length || 0})
+                        </Button>
                     </div>
 
                     {/* Posts Content */}
                     <div className="w-full max-w-2xl">
-                        {activeTab === "posts" ? (
+                        {activeTab === "posts" && (
                             <ProfilePostCard posts={posts || []} />
-                        ) : (
+                        )}
+                        {activeTab === "saved" && (
                             <ProfilePostCard posts={savedPosts || []} />
+                        )}
+                        {activeTab === "liked" && (
+                            <ProfilePostCard posts={likedPosts || []} />
                         )}
                     </div>
                 </div>
