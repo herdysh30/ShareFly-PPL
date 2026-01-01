@@ -49,6 +49,9 @@ Route::middleware('auth')
             // Story routes
             Route::post('/stories', [StoryController::class, 'store'])->name('store.story');
 
+            // Comment routes
+            Route::post('/comment/{post}', [\App\Http\Controllers\CommentController::class, 'store'])->name('comment.store');
+
             Route::middleware(['verified', 'admin'])
                 ->group(
                     function () {
