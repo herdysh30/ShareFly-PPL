@@ -11,14 +11,57 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import { Bell, ChevronDown, User } from "lucide-react";
+import {
+    ChevronDown,
+    Heart,
+    Image,
+    MessageSquare,
+    User,
+    Users,
+} from "lucide-react";
 
-const MainDashboard = () => {
+interface Stats {
+    totalUsers: number;
+    totalPosts: number;
+    totalLikes: number;
+    totalComments: number;
+    totalStories: number;
+}
+
+interface PostsPerDay {
+    date: string;
+    posts: number;
+    likes: number;
+}
+
+interface TopUser {
+    name: string;
+    posts: number;
+}
+
+interface RoleDistribution {
+    role: string;
+    value: number;
+}
+
+interface Props {
+    stats: Stats;
+    postsPerDay: PostsPerDay[];
+    topUsers: TopUser[];
+    roleDistribution: RoleDistribution[];
+}
+
+const MainDashboard = ({
+    stats,
+    postsPerDay,
+    topUsers,
+    roleDistribution,
+}: Props) => {
     const { auth } = usePage().props;
 
     return (
         <>
-            <Head title="Dashboard Post" />
+            <Head title="Dashboard Overview" />
             <DashboardLayout>
                 <div className="items-center flex-1 p-5 space-y-4 text-gray-300 h-max">
                     <div className="flex items-center justify-between">
@@ -73,71 +116,76 @@ const MainDashboard = () => {
                         </div>
                     </div>
                     <div className="flex justify-between gap-2">
-                        <div className="flex items-center justify-between flex-1 p-2 border rounded-lg border-foreground">
+                        <div className="flex items-center justify-between flex-1 p-4 border rounded-lg border-foreground">
                             <div className="grid">
-                                <span>Total User</span>
-                                <span>13.000</span>
-                            </div>
-                            <div className="grid gap-2">
-                                <User className="mx-auto" />
-                                <span className="text-xs text-green-500">
-                                    +2.51%
+                                <span className="text-sm text-gray-400">
+                                    Total Users
                                 </span>
+                                <span className="text-2xl font-bold">
+                                    {stats.totalUsers.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="p-3 rounded-full bg-blue-500/20">
+                                <Users className="text-blue-400" />
                             </div>
                         </div>
-                        <div className="flex items-center justify-between flex-1 p-2 border rounded-lg border-foreground">
+                        <div className="flex items-center justify-between flex-1 p-4 border rounded-lg border-foreground">
                             <div className="grid">
-                                <span>Total Post</span>
-                                <span>13.000</span>
-                            </div>
-                            <div className="grid gap-2">
-                                <User className="mx-auto" />
-                                <span className="text-xs text-green-500">
-                                    +2.51%
+                                <span className="text-sm text-gray-400">
+                                    Total Posts
                                 </span>
+                                <span className="text-2xl font-bold">
+                                    {stats.totalPosts.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="p-3 rounded-full bg-green-500/20">
+                                <Image className="text-green-400" />
                             </div>
                         </div>
-                        <div className="flex items-center justify-between flex-1 p-2 border rounded-lg border-foreground">
+                        <div className="flex items-center justify-between flex-1 p-4 border rounded-lg border-foreground">
                             <div className="grid">
-                                <span>Total Like</span>
-                                <span>13.000</span>
-                            </div>
-                            <div className="grid gap-2">
-                                <User className="mx-auto" />
-                                <span className="text-xs text-green-500">
-                                    +2.51%
+                                <span className="text-sm text-gray-400">
+                                    Total Likes
                                 </span>
+                                <span className="text-2xl font-bold">
+                                    {stats.totalLikes.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="p-3 rounded-full bg-red-500/20">
+                                <Heart className="text-red-400" />
                             </div>
                         </div>
-                        <div className="flex items-center justify-between flex-1 p-2 border rounded-lg border-foreground">
+                        <div className="flex items-center justify-between flex-1 p-4 border rounded-lg border-foreground">
                             <div className="grid">
-                                <span>Total Comment</span>
-                                <span>13.000</span>
-                            </div>
-                            <div className="grid gap-2">
-                                <User className="mx-auto" />
-                                <span className="text-xs text-green-500">
-                                    +2.51%
+                                <span className="text-sm text-gray-400">
+                                    Total Comments
                                 </span>
+                                <span className="text-2xl font-bold">
+                                    {stats.totalComments.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="p-3 rounded-full bg-purple-500/20">
+                                <MessageSquare className="text-purple-400" />
                             </div>
                         </div>
-                        <div className="flex items-center justify-between flex-1 p-2 border rounded-lg border-foreground">
+                        <div className="flex items-center justify-between flex-1 p-4 border rounded-lg border-foreground">
                             <div className="grid">
-                                <span>Total Share</span>
-                                <span>13.000</span>
-                            </div>
-                            <div className="grid gap-2">
-                                <User className="mx-auto" />
-                                <span className="text-xs text-green-500">
-                                    +2.51%
+                                <span className="text-sm text-gray-400">
+                                    Total Stories
                                 </span>
+                                <span className="text-2xl font-bold">
+                                    {stats.totalStories.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="p-3 rounded-full bg-yellow-500/20">
+                                <User className="text-yellow-400" />
                             </div>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                        <ChartArea />
-                        <ChartBar />
-                        <ChartPie />
+                        <ChartArea data={postsPerDay} />
+                        <ChartBar data={topUsers} />
+                        <ChartPie data={roleDistribution} />
                     </div>
                 </div>
             </DashboardLayout>
