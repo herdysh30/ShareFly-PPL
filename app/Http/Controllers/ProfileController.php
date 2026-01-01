@@ -76,15 +76,36 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validatedData = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Handle Profile Picture
+        if ($request->hasFile('profile_picture')) {
+            $user->updateProfilePicture($request->file('profile_picture'));
         }
 
-        $request->user()->save();
+        // Handle Profile Background
+        if ($request->hasFile('profile_background')) {
+            // Delete old background if exists except if it's default
+            if ($user->profile_background && !str_starts_with($user->profile_background, 'http')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_background);
+            }
 
-        return Redirect::route('profile.edit');
+            $path = $request->file('profile_background')->store('images/users', 'public');
+            $user->profile_background = $path; // Store relative path
+        }
+
+        $user->fill([
+            'firstname' => $validatedData['firstname'] ?? $user->firstname,
+            'lastname' => $validatedData['lastname'] ?? $user->lastname,
+            'username' => $validatedData['username'],
+            'bio' => $validatedData['bio'] ?? null,
+            'no_telepon' => $validatedData['no_telepon'] ?? null,
+        ]);
+
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**

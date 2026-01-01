@@ -1,9 +1,16 @@
-import { useState, useCallback, FormEvent, InputHTMLAttributes, SyntheticEvent, ChangeEvent } from 'react';
-import { useDropzone } from 'react-dropzone';
-import ReactCrop from 'react-easy-crop';
-import { AspectRatio } from './ui/aspect-ratio';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import {
+    useState,
+    useCallback,
+    FormEvent,
+    InputHTMLAttributes,
+    SyntheticEvent,
+    ChangeEvent,
+} from "react";
+import { useDropzone } from "react-dropzone";
+import ReactCrop from "react-easy-crop";
+import { AspectRatio } from "./ui/aspect-ratio";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface ImageUploaderProps {
     onImageUploaded?: () => void;
@@ -11,7 +18,9 @@ interface ImageUploaderProps {
     setImage: React.Dispatch<React.SetStateAction<string | null>>;
     previewImage: string | null;
     setPreviewImage: React.Dispatch<React.SetStateAction<string | null>>;
-    setData: (e: any) => void
+    setData: (e: any) => void;
+    aspect?: number;
+    isCircular?: boolean;
 }
 
 const ImageUploader = ({
@@ -21,6 +30,8 @@ const ImageUploader = ({
     previewImage,
     setPreviewImage,
     setData,
+    aspect = 1,
+    isCircular = false,
 }: ImageUploaderProps) => {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
@@ -40,7 +51,7 @@ const ImageUploader = ({
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
-        accept: { 'image/*': [] },
+        accept: { "image/*": [] },
         multiple: false,
     });
 
@@ -51,11 +62,11 @@ const ImageUploader = ({
     const cropAndSave = useCallback(() => {
         if (!image || !croppedAreaPixels) return;
 
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         const img = new Image();
         img.src = image;
         img.onload = () => {
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext("2d");
             if (ctx) {
                 canvas.width = croppedAreaPixels.width;
                 canvas.height = croppedAreaPixels.height;
@@ -73,8 +84,8 @@ const ImageUploader = ({
 
                 canvas.toBlob((blob) => {
                     if (blob) {
-                        const file = new File([blob], 'cropped-image.jpg', {
-                            type: 'image/webp',
+                        const file = new File([blob], "cropped-image.jpg", {
+                            type: "image/jpeg",
                         });
                         setPreviewImage(URL.createObjectURL(file));
                         setImage(null);
@@ -84,15 +95,15 @@ const ImageUploader = ({
                     if (onImageUploaded) {
                         onImageUploaded();
                     }
-                }, 'image/webp');
+                }, "image/jpeg");
             }
         };
     }, [image, croppedAreaPixels]);
 
     const handleCropAndSave = (e: FormEvent) => {
-        e.preventDefault()
-        cropAndSave()
-    }
+        e.preventDefault();
+        cropAndSave();
+    };
 
     const handleRemoveImage = () => {
         setImage(null);
@@ -106,26 +117,38 @@ const ImageUploader = ({
                     {...getRootProps()}
                     className="p-6 border-2 border-dashed rounded-md cursor-pointer"
                 >
-                    <Input name='image' type='file' {...getInputProps()} />
-                    <p className="text-center">Drag & Drop an image or click to select</p>
+                    <Input name="image" type="file" {...getInputProps()} />
+                    <p className="text-center">
+                        Drag & Drop an image or click to select
+                    </p>
                 </div>
             ) : (
                 <>
                     {image && (
                         <div className="relative mt-4">
-                            <AspectRatio ratio={1} className="overflow-hidden rounded-lg">
+                            <AspectRatio
+                                ratio={aspect}
+                                className="overflow-hidden rounded-lg"
+                            >
                                 <ReactCrop
                                     image={image}
                                     crop={crop}
                                     zoom={zoom}
+                                    aspect={aspect}
+                                    cropShape={isCircular ? "round" : "rect"}
                                     onCropChange={setCrop}
                                     onZoomChange={setZoom}
                                     onCropComplete={onCropComplete}
                                 />
                             </AspectRatio>
                             <div className="mt-4 space-x-4 text-center">
-                                <Button onClick={handleCropAndSave}>Crop & Save</Button>
-                                <Button variant="destructive" onClick={handleRemoveImage}>
+                                <Button onClick={handleCropAndSave}>
+                                    Crop & Save
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleRemoveImage}
+                                >
                                     Remove Image
                                 </Button>
                             </div>
@@ -134,7 +157,7 @@ const ImageUploader = ({
 
                     {previewImage && (
                         <>
-                            <AspectRatio ratio={1}>
+                            <AspectRatio ratio={aspect}>
                                 <img
                                     src={previewImage}
                                     alt="Cropped"
@@ -142,7 +165,11 @@ const ImageUploader = ({
                                 />
                             </AspectRatio>
                             <div className="mt-4 text-center">
-                                <Button type='button' variant="destructive" onClick={handleRemoveImage}>
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    onClick={handleRemoveImage}
+                                >
                                     Remove Image
                                 </Button>
                             </div>
