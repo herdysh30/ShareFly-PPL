@@ -44,6 +44,7 @@ import { useSweetAlert } from "@/hooks/use-sweetAlert";
 import { useToast } from "@/hooks/use-toast";
 import usePosts from "@/hooks/features/use-posts";
 import useLikes from "@/hooks/features/use-likes";
+import useSavedPosts from "@/hooks/features/use-saved-posts";
 const EmojiPicker = lazy(() => import("emoji-picker-react"));
 
 export default function PostCard() {
@@ -52,10 +53,43 @@ export default function PostCard() {
     const toast = useToast();
     const { data, isLoading, refetch: refetchPost } = usePosts();
     const { data: dataLikes, refetch } = useLikes();
+    const { data: savedPosts, refetch: refetchSaved } = useSavedPosts();
 
     const userLiked: ILikes[] = dataLikes?.data?.filter(
         (like: ILikes) => like.userId === auth?.user?.id
     );
+
+    const isPostSaved = (postId: number) => {
+        return savedPosts?.some((post: IPosts) => post.id === postId);
+    };
+
+    const handleClickSave = (postId: number) => {
+        if (!auth?.user) {
+            modal({
+                title: "You're Not Logged In",
+                text: "Please Login to save posts!",
+                icon: "warning",
+                confirmButtonText: "Login",
+                denyButtonText: "Register",
+                showCancelButton: true,
+                preConfirm() {
+                    router.visit("login");
+                },
+            });
+            return;
+        }
+
+        router.post(
+            route("post.save", postId),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    refetchSaved();
+                },
+            }
+        );
+    };
 
     const handleClickReport = () => {
         !auth.user &&
@@ -376,8 +410,18 @@ export default function PostCard() {
                                         <Send />
                                     </Button>
                                 </div>
-                                <Button variant={"ghost"} size={"icon"}>
-                                    <Bookmark />
+                                <Button
+                                    variant={"ghost"}
+                                    size={"icon"}
+                                    onClick={() => handleClickSave(post.id)}
+                                >
+                                    <Bookmark
+                                        className={
+                                            isPostSaved(post.id)
+                                                ? "fill-current"
+                                                : ""
+                                        }
+                                    />
                                 </Button>
                             </div>
                             <Button

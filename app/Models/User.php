@@ -72,4 +72,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Story::class, 'userId');
     }
+
+    public function savedPosts()
+    {
+        return $this->hasMany(SavedPost::class, 'userId');
+    }
 }

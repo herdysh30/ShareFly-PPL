@@ -52,6 +52,10 @@ Route::middleware('auth')
             // Comment routes
             Route::post('/comment/{post}', [\App\Http\Controllers\CommentController::class, 'store'])->name('comment.store');
 
+            // Saved post routes
+            Route::post('/save-post/{post}', [\App\Http\Controllers\SavedPostController::class, 'toggle'])->name('post.save');
+            Route::get('/saved-posts', [\App\Http\Controllers\SavedPostController::class, 'index'])->name('saved.posts');
+
             Route::middleware(['verified', 'admin'])
                 ->group(
                     function () {
