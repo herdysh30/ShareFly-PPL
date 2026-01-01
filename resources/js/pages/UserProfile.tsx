@@ -11,14 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AppLayout from "@/layouts/AppLayout";
 import { HomeContext } from "@/pages/Home";
-import { ArrowLeft, Calendar, BadgeCheckIcon, Grid3X3 } from "lucide-react";
-
-interface Post {
-    id: number;
-    description: string;
-    image: string;
-    created_at: string;
-}
+import { ArrowLeft, Calendar, BadgeCheckIcon } from "lucide-react";
+import ProfilePostCard from "@/components/ProfilePostCard";
+import { IPosts } from "@/types";
 
 interface User {
     id: number;
@@ -37,7 +32,7 @@ interface User {
 
 interface Props {
     user: User;
-    posts: Post[];
+    posts: IPosts[];
     canLogin: boolean;
     canRegister: boolean;
     hasHome: boolean;
@@ -141,47 +136,9 @@ export default function UserProfile({
                     </Card>
 
                     {/* Posts Grid */}
-                    <Card className="w-full max-w-2xl">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Grid3X3 className="size-5" />
-                                Posts ({posts?.length || 0})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {posts && posts.length > 0 ? (
-                                <div className="grid grid-cols-3 gap-2">
-                                    {posts.map((post) => (
-                                        <div
-                                            key={post.id}
-                                            className="relative aspect-square group"
-                                        >
-                                            <img
-                                                src={
-                                                    post.image?.startsWith(
-                                                        "http"
-                                                    )
-                                                        ? post.image
-                                                        : `/storage/${post.image}`
-                                                }
-                                                alt={post.description}
-                                                className="object-cover w-full h-full rounded-lg"
-                                            />
-                                            <div className="absolute inset-0 flex items-center justify-center transition-opacity bg-black/50 opacity-0 group-hover:opacity-100 rounded-lg">
-                                                <p className="p-2 text-xs text-center text-white line-clamp-3">
-                                                    {post.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-center text-muted-foreground">
-                                    No posts yet.
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <div className="w-full max-w-2xl">
+                        <ProfilePostCard posts={posts} />
+                    </div>
                 </div>
             </AppLayout>
         </HomeContext.Provider>

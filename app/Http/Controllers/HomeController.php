@@ -19,12 +19,18 @@ class HomeController extends Controller
     public function showUserProfile($username)
     {
         $user = User::where('username', $username)
-            ->with(['post', 'role'])
+            ->with('role')
             ->firstOrFail();
+
+        $posts = \App\Models\Post::where('userId', $user->id)
+            ->with(['users', 'comments.users'])
+            ->withCount(['likes', 'comments'])
+            ->latest()
+            ->get();
 
         return \Inertia\Inertia::render('UserProfile', [
             'user' => $user,
-            'posts' => $user->post,
+            'posts' => $posts,
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
             'hasHome' => Route::has('home'),
