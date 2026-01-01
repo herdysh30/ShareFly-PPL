@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
+use App\Models\Like;
 use App\Models\Post;
+use App\Models\Story;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +20,51 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        return \Inertia\Inertia::render('auth/dashboard/index');
+        $stats = [
+            'totalUsers' => User::count(),
+            'totalPosts' => Post::count(),
+            'totalLikes' => Like::count(),
+            'totalComments' => Comment::count(),
+            'totalStories' => Story::count(),
+        ];
+
+        // Posts per day (last 7 days) for Area Chart
+        $postsPerDay = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $postsPerDay[] = [
+                'date' => $date->format('M d'),
+                'posts' => Post::whereDate('created_at', $date->toDateString())->count(),
+                'likes' => Like::whereDate('created_at', $date->toDateString())->count(),
+            ];
+        }
+
+        // Top 5 users with most posts for Bar Chart
+        $topUsers = User::withCount('post')
+            ->orderBy('post_count', 'desc')
+            ->take(5)
+            ->get()
+            ->map(fn($user) => [
+                'name' => $user->username,
+                'posts' => $user->post_count,
+            ]);
+
+        // Role distribution for Pie Chart
+        $roleDistribution = User::selectRaw('roleId, count(*) as total')
+            ->groupBy('roleId')
+            ->with('role')
+            ->get()
+            ->map(fn($item) => [
+                'role' => $item->role->name ?? 'Unknown',
+                'value' => $item->total,
+            ]);
+
+        return \Inertia\Inertia::render('auth/dashboard/index', [
+            'stats' => $stats,
+            'postsPerDay' => $postsPerDay,
+            'topUsers' => $topUsers,
+            'roleDistribution' => $roleDistribution,
+        ]);
     }
 
     public function posts()
