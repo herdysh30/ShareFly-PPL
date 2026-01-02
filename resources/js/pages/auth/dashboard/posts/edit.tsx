@@ -8,14 +8,23 @@ import { Head, Link, useForm } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
 
 const EditPost = ({ post }: { post: IPosts }) => {
-    const { data, setData, put, processing, errors } = useForm({
+    const {
+        data,
+        setData,
+        post: submitForm,
+        processing,
+        errors,
+    } = useForm({
         description: post.description || "",
         image: null as File | null,
+        _method: "PUT",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route("dashboard.posts.update", post.id));
+        submitForm(route("dashboard.posts.update", post.id), {
+            forceFormData: true,
+        });
     };
 
     return (
